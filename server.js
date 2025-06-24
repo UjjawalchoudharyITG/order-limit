@@ -19,7 +19,7 @@ const SHOPIFY_STORE = 'newitt.myshopify.com';
 const ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN || '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';
 
 // POST /check-time-slots - accepts multiple slots [{date, fromTime, toTime}]
-app.get('/check-limit', async (req, res) => {
+app.post('/check-limit', async (req, res) => {
     const { slots } = req.body;
 
   if (!slots || !Array.isArray(slots) || slots.length === 0) {
