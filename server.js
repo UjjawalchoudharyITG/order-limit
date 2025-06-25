@@ -75,7 +75,7 @@ app.get('/check-limit', async (req, res) => {
   try {
     const since = getTimeWindowISOString();
 
-    const url = `https://${SHOPIFY_STORE}/admin/api/2023-10/orders.json?created_at_min=${since}&status=any&fields=id`;
+    const url = `https://${SHOPIFY_STORE}/admin/api/2023-10/orders.json?status=any&fields=id`;
 
     const response = await axios.get(url, {
       headers: {
