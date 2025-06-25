@@ -1,85 +1,40 @@
 const express = require('express');
 const axios = require('axios');
-const cors = require('cors');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
 
-// Allow CORS from your Shopify store (adjust if needed)
-const corsOptions = {
-  origin: 'https://newitt.myshopify.com',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  credentials: true
-};
+const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE;
+const ORDER_LIMIT = 10;
+const TIME_WINDOW_HOURS = 2;
 
-app.use(cors(corsOptions)); // applies to all routes
-app.use(express.json()); // Parse JSON bodies
+function getTimeWindowISOString() {
+  const date = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000);
+  return date.toISOString();
+}
 
-// Shopify config
-const SHOPIFY_STORE = 'newitt.myshopify.com';
-const ACCESS_TOKEN = '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';
-
-// POST /check-limit
-app.post('/check-limit', async (req, res) => {
-  const { slots } = req.body;
-
-  if (!slots || !Array.isArray(slots) || slots.length === 0) {
-    return res.status(400).json({ error: 'Slots array is required' });
-  }
-
+app.get('/check-limit', async (req, res) => {
   try {
-    const results = await Promise.all(
-      slots.map(async (slot) => {
-        const { date, fromTime, toTime } = slot;
-        if (!date || !fromTime || !toTime) {
-          return { slot, error: 'Missing date or time' };
-        }
+    const since = getTimeWindowISOString();
 
-        const created_at_min = new Date(`${date}T${fromTime}:00`).toISOString();
-        const created_at_max = new Date(`${date}T${toTime}:00`).toISOString();
-
-        const url = `https://${SHOPIFY_STORE}/admin/api/2023-07/orders.json`;
-
-        const response = await axios.get(url, {
-          headers: {
-            'X-Shopify-Access-Token': ACCESS_TOKEN,
-            'Content-Type': 'application/json'
-          },
-          params: {
-            status: 'any',
-            created_at_min,
-            created_at_max,
-            fields: 'id'
-          }
-        });
-
-        return {
-          slot,
-          orderCount: response.data.orders.length
-        };
-      })
+    const response = await axios.get(
+      `https://${SHOPIFY_STORE}/admin/api/2023-10/orders.json?created_at_min=${since}&status=any&fields=id`,
+      {
+        headers: {
+          'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
+        },
+      }
     );
 
-    const totalOrderCount = results.reduce((sum, r) => sum + (r.orderCount || 0), 0);
+    const orderCount = response.data.orders.length;
+    const allowed = orderCount < ORDER_LIMIT;
 
-    res.json({
-      totalOrderCount,
-      results
-    });
-
+    res.json({ allowed, orderCount });
   } catch (error) {
-    console.error('❌ Error fetching orders:', error?.response?.data || error.message);
+    console.error(error?.response?.data || error.message);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
 
-// Test route
-app.get('/', (req, res) => {
-  res.json({ message: '✅ API is working' });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
