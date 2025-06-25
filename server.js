@@ -5,11 +5,13 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+app.options('*', cors());
 // Allow requests from any frontend (no origin restriction)
 app.use(cors({
-  origin: '*',
-  methods: 'GET,POST',
-  optionsSuccessStatus: 200
+  origin: 'https://newitt.myshopify.com',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true
 }));
 
 app.use(express.json()); // Parse JSON bodies
