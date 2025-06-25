@@ -6,14 +6,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-app.options('*', cors());
-// Allow requests from any frontend (no origin restriction)
-app.use(cors({
+const corsOptions = {
   origin: 'https://newitt.myshopify.com',
   methods: ['GET', 'POST', 'OPTIONS'],
   credentials: true
-}));
+};
 
+app.use(cors(corsOptions)); // applies to all routes
 app.use(express.json()); // Parse JSON bodies
 
 // Shopify store config - use env vars in production!
