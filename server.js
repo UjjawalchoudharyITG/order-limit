@@ -52,8 +52,8 @@ const app = express();
 
 app.use(express.json());
 
-const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
-const SHOPIFY_STORE = process.env.SHOPIFY_STORE;
+const SHOPIFY_ACCESS_TOKEN = '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';
+const SHOPIFY_STORE = 'b2b-it-yokkao-com.myshopify.com';
 const ORDER_LIMIT = 10;
 const TIME_WINDOW_HOURS = 2;
 
