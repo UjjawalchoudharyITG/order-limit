@@ -7,17 +7,17 @@ const PORT = process.env.PORT || 3000;
 
 // Allow CORS from your Shopify store (adjust if needed)
 const corsOptions = {
-  origin: '*', // Change to specific domain in production
+  origin: 'https://newitt.myshopify.com',
   methods: ['GET', 'POST', 'OPTIONS'],
   credentials: true
 };
 
-app.use(cors(corsOptions));
-app.use(express.json());
+app.use(cors(corsOptions)); // applies to all routes
+app.use(express.json()); // Parse JSON bodies
 
 // Shopify config
 const SHOPIFY_STORE = 'newitt.myshopify.com';
-const ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN || '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';
+const ACCESS_TOKEN = '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';
 
 // POST /check-limit
 app.post('/check-limit', async (req, res) => {
