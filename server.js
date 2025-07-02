@@ -48,7 +48,7 @@ app.get('/check-limit', async (req, res) => {
     const orders = response.data.orders || [];
     const orderCount = orders.length;
 
-    res.json({ orderCount,orderData, orders });
+    res.json({ orderCount,orderData, orders: JSON.parse(JSON.stringify(orders)) });
 
   } catch (error) {
     console.error(error?.response?.data || error.message);
@@ -68,7 +68,7 @@ async function checkShopifyOrders() {
       },
     });
 
-     const orderData = response.data || [];
+    const orderData = response.data || [];
     const orders = response.data.orders || [];
     const orderCount = orders.length;
 
