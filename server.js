@@ -36,7 +36,7 @@ app.get('/check-limit', async (req, res) => {
   try {
     const since = getTimeWindowISOString();
 
-    const url = `https://${SHOPIFY_STORE}/admin/api/2023-10/orders.json?status=any&fields=id`;
+    const url = `https://${SHOPIFY_STORE}/admin/api/2023-10/orders.json?status=any&fields=id,created_at,updated_at`;
     const response = await axios.get(url, {
       headers: {
         'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
@@ -44,11 +44,14 @@ app.get('/check-limit', async (req, res) => {
       },
     });
 
-    const orderData = response.data || [];
     const orders = response.data.orders || [];
     const orderCount = orders.length;
-
-    res.json({ orderCount,orderData, orders: JSON.parse(JSON.stringify(orders)) });
+    const minimalOrders = orders.map(order => ({
+        id: order.id,
+        created_at: order.created_at,
+        updated_at: order.updated_at
+      }));
+    res.json({ orderCount ,minimalOrders });
 
   } catch (error) {
     console.error(error?.response?.data || error.message);
@@ -68,13 +71,18 @@ async function checkShopifyOrders() {
       },
     });
 
-    const orderData = response.data || [];
     const orders = response.data.orders || [];
     const orderCount = orders.length;
 
-    console.log( orderCount,orderData, orders);
+    orders.forEach(order => {
+      console.log({
+        id: order.id,
+        created_at: order.created_at,
+        updated_at: order.updated_at
+      });
+    });
 
-    console.log('✅ Order Count:', orderCount);
+    console.log(`Total Orders: ${orderCount}`);
   } catch (error) {
     console.error('❌ Error fetching orders:', error?.response?.data || error.message);
   }
